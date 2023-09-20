@@ -69,49 +69,46 @@ class ReflectionModelEditorScreen extends HookWidget {
               onChanged: (value) => prompt.value = value,
             ),
             const SizedBox(height: 8),
+            Text(
+              'Questions',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (int i = 0; i < questions.value.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: ReflectionQuestionEditor(
+                      questions.value[i],
+                      title: 'Question ${i + 1}',
+                      onDelete: () {
+                        questions.value = [
+                          ...questions.value.sublist(0, i),
+                          if (i + 1 < questions.value.length)
+                            ...questions.value.sublist(i + 1),
+                        ];
+                      },
+                    ),
+                  ),
+              ],
+            ),
             if (canAdd)
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    'Questions',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: () {
-                      questions.value = [...questions.value, ''];
+                  TextButton(
+                    onPressed: () async {
+                      questions.value = [
+                        ...questions.value,
+                        ReflectionQuestion()
+                      ];
                     },
+                    child: const Text('Add Question'),
                   ),
                 ],
               ),
-            Expanded(
-              child: ListView(
-                children: [
-                  for (int i = 0; i < questions.value.length; i++)
-                    Column(
-                      children: [
-                        TextFormField(
-                          initialValue: questions.value[i],
-                          maxLines: null,
-                          onChanged: (value) {
-                            questions.value = [
-                              ...questions.value.sublist(0, i),
-                              value,
-                              ...questions.value.sublist(i + 1),
-                            ];
-                          },
-                          decoration: InputDecoration(
-                            labelText: 'Question ${i + 1}',
-                            hintText: 'Enter Question ${i + 1}',
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                      ],
-                    ),
-                ],
-              ),
-            ),
+            const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

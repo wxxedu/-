@@ -8,7 +8,10 @@ class ReflectionModelDisplayScreen extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final reflections = useFuture(model.links.load());
+    final key = useState(UniqueKey());
+    final reflectionsFuture =
+        useMemoized(() => model.links.load(), [key.value]);
+    final reflections = useFuture(reflectionsFuture);
     if (reflections.hasError) {
       return Padding(
         padding: const EdgeInsets.all(8.0),
@@ -42,7 +45,7 @@ class ReflectionModelDisplayScreen extends HookWidget {
                     leading: const Icon(Icons.note),
                     title: Text(
                       'Reflection created at '
-                      '${DateFormat('YYYY-MM-DD').format(ref.createdAt)}',
+                      '${DateFormat.yMd().format(ref.createdAt)}',
                     ),
                     onTap: () {
                       AutoRouter.of(context).push(
@@ -52,6 +55,18 @@ class ReflectionModelDisplayScreen extends HookWidget {
                         ),
                       );
                     },
+                    trailing: IconButton(
+                      onPressed: () async {
+                        final isar = GetIt.I<Isar>();
+                        await isar.writeTxn(
+                          () async {
+                            await isar.reflections.delete(ref.id);
+                          },
+                        );
+                        key.value = UniqueKey();
+                      },
+                      icon: const Icon(Icons.delete),
+                    ),
                   )
               ],
             ),

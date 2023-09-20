@@ -109,7 +109,7 @@ class ReflectionDisplayRoute
     extends _i4.PageRouteInfo<ReflectionDisplayRouteArgs> {
   ReflectionDisplayRoute({
     required _i5.Reflection reflection,
-    required List<String> questions,
+    required List<_i5.ReflectionQuestion> questions,
     _i6.Key? key,
     List<_i4.PageRouteInfo>? children,
   }) : super(
@@ -137,7 +137,7 @@ class ReflectionDisplayRouteArgs {
 
   final _i5.Reflection reflection;
 
-  final List<String> questions;
+  final List<_i5.ReflectionQuestion> questions;
 
   final _i6.Key? key;
 
@@ -153,7 +153,7 @@ class ReflectionEditorRoute
     extends _i4.PageRouteInfo<ReflectionEditorRouteArgs> {
   ReflectionEditorRoute({
     required _i5.Reflection reflection,
-    required List<String> questions,
+    required List<_i5.ReflectionQuestion> questions,
     _i6.Key? key,
     List<_i4.PageRouteInfo>? children,
   }) : super(
@@ -181,7 +181,7 @@ class ReflectionEditorRouteArgs {
 
   final _i5.Reflection reflection;
 
-  final List<String> questions;
+  final List<_i5.ReflectionQuestion> questions;
 
   final _i6.Key? key;
 
@@ -341,7 +341,7 @@ class ReflectionModelsListRoute extends _i4.PageRouteInfo<void> {
 class ReflectionRoute extends _i4.PageRouteInfo<ReflectionRouteArgs> {
   ReflectionRoute({
     required _i5.Reflection reflection,
-    required List<String> questions,
+    required List<_i5.ReflectionQuestion> questions,
     _i6.Key? key,
     List<_i4.PageRouteInfo>? children,
   }) : super(
@@ -369,7 +369,7 @@ class ReflectionRouteArgs {
 
   final _i5.Reflection reflection;
 
-  final List<String> questions;
+  final List<_i5.ReflectionQuestion> questions;
 
   final _i6.Key? key;
 

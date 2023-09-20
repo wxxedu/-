@@ -1,9 +1,11 @@
 part of 'index.dart';
 
 class ReflectionModelsList extends HookWidget {
-  const ReflectionModelsList(this.models, {super.key});
+  const ReflectionModelsList(this.models, {super.key, this.onDelete});
 
   final List<ReflectionModel> models;
+
+  final void Function(ReflectionModel)? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +20,17 @@ class ReflectionModelsList extends HookWidget {
                 ReflectionModelRoute(model: model),
               );
             },
+            // delete button
+            trailing: IconButton(
+              onPressed: () async {
+                final isar = GetIt.I<Isar>();
+                await isar.writeTxn(() async {
+                  await isar.reflectionModels.delete(model.id);
+                });
+                onDelete?.call(model);
+              },
+              icon: const Icon(Icons.delete),
+            ),
           ),
       ],
     );

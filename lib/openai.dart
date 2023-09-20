@@ -20,7 +20,7 @@ class OpenAiGenerator {
     }
     return right(OpenAI.instance.build(
       token: token,
-      baseOption: HttpSetup(receiveTimeout: const Duration(seconds: 60)),
+      baseOption: HttpSetup(receiveTimeout: const Duration(seconds: 120)),
       enableLog: true,
     ));
   }

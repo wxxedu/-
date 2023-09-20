@@ -51,7 +51,12 @@ class ReflectionModelsListPage extends HookWidget {
           ),
         ],
       ),
-      body: ReflectionModelsList(models.data!),
+      body: ReflectionModelsList(
+        models.data!,
+        onDelete: (model) {
+          reloadKey.value = UniqueKey();
+        },
+      ),
     );
   }
 }

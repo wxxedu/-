@@ -6,7 +6,7 @@ class ReflectionPage extends StatelessWidget {
 
   final Reflection reflection;
 
-  final List<String> questions;
+  final List<ReflectionQuestion> questions;
 
   @override
   Widget build(BuildContext context) {

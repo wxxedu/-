@@ -15,3 +15,4 @@ export 'index.config.dart';
 part 'consts.dart';
 part 'injections.dart';
 part 'routing.dart';
+part 'string_utils.dart';

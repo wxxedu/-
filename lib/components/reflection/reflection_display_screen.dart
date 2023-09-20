@@ -6,7 +6,7 @@ class ReflectionDisplayScreen extends HookWidget {
 
   final Reflection reflection;
 
-  final List<String> questions;
+  final List<ReflectionQuestion> questions;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class ReflectionDisplayScreen extends HookWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Question ${i + 1}. ${questions[i]}',
+                    Text('Question ${i + 1}. ${questions[i].displayText}',
                         style: Theme.of(context).textTheme.titleSmall),
                     const SizedBox(height: 8),
                     Text(reflection.answers[i],

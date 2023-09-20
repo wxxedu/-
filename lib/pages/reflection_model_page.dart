@@ -12,8 +12,32 @@ class ReflectionModelPage extends HookWidget {
     final controller = useTabController(initialLength: 2);
     final progress = useState<(int, int)?>(null);
     return Scaffold(
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            final messenger = ScaffoldMessenger.of(context);
+            final path = await FilePicker.platform.getDirectoryPath();
+            if (path == null) {
+              messenger.showSnackBar(
+                const SnackBar(
+                  content: Text('No path selected'),
+                  duration: Duration(seconds: 1),
+                ),
+              );
+              return;
+            }
+            final filePath = p.join(path, 'reflections.md');
+            await model.exportToMarkdown(filePath);
+            messenger.showSnackBar(
+              SnackBar(
+                content: Text('Exported to $filePath'),
+                duration: const Duration(seconds: 1),
+              ),
+            );
+          },
+          child: const Icon(Icons.save),
+        ),
         appBar: AppBar(
-          title: Text('Reflection ${model.name}'),
+          title: Text('${model.name}'),
           bottom: TabBar(
             controller: controller,
             tabs: const [
@@ -63,7 +87,11 @@ class ReflectionModelPage extends HookWidget {
                       child: ReflectionModelDisplayScreen(model),
                     ),
                   if (current.value == 1)
-                    Expanded(child: ReflectionModelEditorScreen(model)),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: ReflectionModelEditorScreen(model),
+                      ),
+                    ),
                 ],
               )
             : Column(

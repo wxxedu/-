@@ -10,7 +10,7 @@ class ReflectionModel {
 
   DateTime createdAt = DateTime.now();
 
-  List<String> questions = [];
+  List<ReflectionQuestion> questions = [];
 
   @Backlink(to: 'model')
   IsarLinks<Reflection> links = IsarLinks<Reflection>();
@@ -20,7 +20,7 @@ class ReflectionModel {
   static Future<ReflectionModel> create({
     required String name,
     required String prompt,
-    List<String>? questions,
+    List<ReflectionQuestion>? questions,
     Isar? isar,
   }) async {
     isar ??= GetIt.I<Isar>();
@@ -34,6 +34,43 @@ class ReflectionModel {
     return model;
   }
 
+  Future<File> exportToPdf(String path) async {
+    throw UnimplementedError();
+  }
+
+  Future<File> exportToMarkdown(String path) async {
+    await links.load();
+    final file = File(path);
+    if (await file.exists()) {
+      await file.delete();
+    }
+    await file.create(recursive: true);
+    final writer = StringBuffer();
+    writer.writeln('# $name');
+    writer.writeln();
+    for (int i = 0; i < links.length; i++) {
+      final reflection = links.toList()[i];
+      // format the date
+      writer.writeln('### Reflection for Week ${i + 1}');
+      final date = DateFormat('yyyy-MM-dd').format(reflection.createdAt);
+      writer.writeln();
+      writer.writeln('**Date**: $date\t\t**Author**: #YOUR_NAME_HERE#');
+      writer.writeln();
+      for (int j = 0; j < questions.length; j++) {
+        if (j >= reflection.answers.length) {
+          break;
+        }
+        final question = questions[j];
+        writer.write('##### Question ${j + 1}. ${question.displayText}');
+        writer.writeln();
+        writer.writeln(reflection.answers[j]);
+        writer.writeln();
+      }
+    }
+    await file.writeAsString(writer.toString());
+    return file;
+  }
+
   Future<Reflection> newReflection({
     Isar? isar,
     OpenAiGenerator? generator,
@@ -41,7 +78,8 @@ class ReflectionModel {
     ValueNotifier<(int, int)?>? progressNotifier,
   }) async {
     isar ??= GetIt.I<Isar>();
-    final reflection = await Reflection.create(isar: isar);
+    final reflection =
+        await Reflection.create(isar: isar, createdAt: createdAt);
     reflection.model.value = this;
     await isar.writeTxn(() => reflection.model.save());
     generator ??= GetIt.I<OpenAiGenerator>();
@@ -56,7 +94,7 @@ class ReflectionModel {
     progressNotifier?.value = (0, questions.length);
     for (int i = 0; i < questions.length; i++) {
       final question = questions[i];
-      messages.add(Messages(role: Role.user, content: "${i + 1}. $question"));
+      messages.addAll(question.messages);
       final request = ChatCompleteText(
         model: GptTurbo16k0631Model(),
         messages: messages,
@@ -116,7 +154,7 @@ class ReflectionModel {
         break;
       }
       final question = questions[i];
-      res.add(Messages(role: Role.user, content: question));
+      res.addAll(question.messages);
       final answer = reflection.answers[i];
       res.add(Messages(role: Role.assistant, content: answer));
     }

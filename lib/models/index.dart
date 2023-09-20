@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fu/openai.dart';
@@ -9,3 +11,4 @@ import 'package:logging/logging.dart';
 part 'index.g.dart';
 part 'reflection.dart';
 part 'reflection_model.dart';
+part 'reflection_question.dart';
