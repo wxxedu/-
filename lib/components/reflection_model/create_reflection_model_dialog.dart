@@ -23,6 +23,7 @@ class CreateReflectionModelDialog extends HookWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextFormField(
+                maxLines: null,
                 onChanged: (value) => name.value = value,
                 decoration: const InputDecoration(
                   labelText: 'Name',
@@ -30,10 +31,13 @@ class CreateReflectionModelDialog extends HookWidget {
                 ),
               ),
               TextFormField(
+                maxLines: null,
                 onChanged: (value) => prompt.value = value,
                 decoration: const InputDecoration(
                   labelText: 'Prompt',
-                  hintText: 'Prompt for the model',
+                  hintText:
+                      'Enter the prompt for the model, this is fed to GPT as the '
+                      'system message',
                 ),
               ),
               const Spacer(),

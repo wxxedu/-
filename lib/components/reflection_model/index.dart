@@ -12,4 +12,5 @@ import 'package:isar/isar.dart';
 part 'create_reflection_model_dialog.dart';
 part 'reflection_model_display_screen.dart';
 part 'reflection_model_editor_screen.dart';
+part 'reflection_model_questions_list.dart';
 part 'reflection_models_list.dart';

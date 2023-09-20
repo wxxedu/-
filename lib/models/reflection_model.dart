@@ -38,21 +38,29 @@ class ReflectionModel {
     Isar? isar,
     OpenAiGenerator? generator,
     DateTime? createdAt,
+    ValueNotifier<(int, int)?>? progressNotifier,
   }) async {
     isar ??= GetIt.I<Isar>();
     final reflection = await Reflection.create(isar: isar);
     reflection.model.value = this;
     await isar.writeTxn(() => reflection.model.save());
-
     generator ??= GetIt.I<OpenAiGenerator>();
     final openAi = generator.getOrCrash();
-    final messages = await _getAllMessages();
+    final messages = [
+      Messages(
+        role: Role.system,
+        content: prompt,
+      ),
+      ...await _getAllMessages(besides: reflection.id),
+    ];
+    progressNotifier?.value = (0, questions.length);
     for (int i = 0; i < questions.length; i++) {
       final question = questions[i];
       messages.add(Messages(role: Role.user, content: "${i + 1}. $question"));
       final request = ChatCompleteText(
-        model: GptTurboChatModel(),
+        model: GptTurbo16k0631Model(),
         messages: messages,
+        maxToken: null,
       );
       final response = await openAi.onChatCompletion(request: request);
       final answer = response?.choices.first.message?.content;
@@ -66,10 +74,12 @@ class ReflectionModel {
         reflection.answers.add('');
         messages.add(Messages(role: Role.assistant, content: ''));
       }
+      progressNotifier?.value = (i + 1, questions.length);
     }
     logger
         .info('Got data from GPT, saving reflection with id ${reflection.id}');
     await isar.writeTxn(() => isar!.reflections.put(reflection));
+    progressNotifier?.value = null;
     return reflection;
   }
 
@@ -78,16 +88,20 @@ class ReflectionModel {
     return isar.reflectionModels.where().sortByCreatedAt().findAll();
   }
 
-  Future<List<Messages>> _getAllMessages() async {
+  Future<List<Messages>> _getAllMessages({required int besides}) async {
     final res = <Messages>[];
     await links.load();
-    for (final reflection in links) {
+    for (int i = 0; i < links.length; i++) {
+      final reflection = links.toList()[i];
+      // if (reflection.id == besides) {
+      //   continue;
+      // }
       // format the date
       final date = DateFormat('yyyy-MM-dd').format(reflection.createdAt);
       res.add(
         Messages(
           role: Role.assistant,
-          content: 'You are now writing for $date',
+          content: 'You are now writing for $date, the ${i + 1} th reflection',
         ),
       );
       res.addAll(_getMessagesForReflection(reflection));
@@ -98,11 +112,19 @@ class ReflectionModel {
   List<Messages> _getMessagesForReflection(Reflection reflection) {
     final res = <Messages>[];
     for (int i = 0; i < questions.length; i++) {
+      if (i >= reflection.answers.length) {
+        break;
+      }
       final question = questions[i];
       res.add(Messages(role: Role.user, content: question));
       final answer = reflection.answers[i];
       res.add(Messages(role: Role.assistant, content: answer));
     }
     return res;
+  }
+
+  Future<bool> canAddQuestion() async {
+    await links.load();
+    return links.isEmpty;
   }
 }

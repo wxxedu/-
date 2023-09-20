@@ -1,7 +1,7 @@
 part of 'index.dart';
 
 @RoutePage()
-class ReflectionModelEditorScreen extends StatelessWidget {
+class ReflectionModelEditorScreen extends HookWidget {
   const ReflectionModelEditorScreen(
     this.model, {
     super.key,
@@ -20,6 +20,9 @@ class ReflectionModelEditorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final canAddFuture = useMemoized(() => model.canAddQuestion());
+    final canAddSnapshot = useFuture(canAddFuture);
+    final canAdd = canAddSnapshot.hasData ? canAddSnapshot.data! : false;
     final name = useState(model.name);
     final prompt = useState(model.prompt);
     final questions = useState(model.questions);
@@ -39,31 +42,49 @@ class ReflectionModelEditorScreen extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       child: Form(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text('Model Details',
+                style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 8),
             TextFormField(
-              decoration: const InputDecoration(labelText: 'Name'),
+              maxLines: null,
+              decoration: const InputDecoration(
+                labelText: 'Name',
+                hintText: 'Enter the name of the model',
+              ),
               initialValue: model.name,
               onChanged: (value) => name.value = value,
             ),
             const SizedBox(height: 8),
             TextFormField(
-              decoration: const InputDecoration(labelText: 'Prompt'),
+              maxLines: null,
+              decoration: const InputDecoration(
+                labelText: 'Prompt',
+                hintText:
+                    'Enter the prompt for the model, this is fed to GPT as the '
+                    'system message',
+              ),
               initialValue: model.prompt,
               onChanged: (value) => prompt.value = value,
             ),
             const SizedBox(height: 8),
-            Row(
-              children: [
-                const Text('Questions'),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () {
-                    questions.value = [...questions.value, ''];
-                  },
-                ),
-              ],
-            ),
+            if (canAdd)
+              Row(
+                children: [
+                  Text(
+                    'Questions',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.add),
+                    onPressed: () {
+                      questions.value = [...questions.value, ''];
+                    },
+                  ),
+                ],
+              ),
             Expanded(
               child: ListView(
                 children: [
@@ -72,6 +93,7 @@ class ReflectionModelEditorScreen extends StatelessWidget {
                       children: [
                         TextFormField(
                           initialValue: questions.value[i],
+                          maxLines: null,
                           onChanged: (value) {
                             questions.value = [
                               ...questions.value.sublist(0, i),
@@ -79,6 +101,10 @@ class ReflectionModelEditorScreen extends StatelessWidget {
                               ...questions.value.sublist(i + 1),
                             ];
                           },
+                          decoration: InputDecoration(
+                            labelText: 'Question ${i + 1}',
+                            hintText: 'Enter Question ${i + 1}',
+                          ),
                         ),
                         const SizedBox(height: 8),
                       ],
@@ -87,8 +113,8 @@ class ReflectionModelEditorScreen extends StatelessWidget {
               ),
             ),
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Spacer(),
                 TextButton(
                   onPressed: () async {
                     final isar = GetIt.I<Isar>();
@@ -113,7 +139,18 @@ class ReflectionModelEditorScreen extends StatelessWidget {
                 const SizedBox(width: 8),
                 FilledButton.tonal(
                   onPressed: () async {
+                    final messenger = ScaffoldMessenger.of(context);
+                    final isar = GetIt.I<Isar>();
                     onSave?.call(model);
+                    await isar.writeTxn(() async {
+                      await isar.reflectionModels.put(model);
+                    });
+                    messenger.showSnackBar(
+                      SnackBar(
+                        content: Text('Saved ${model.name}'),
+                        duration: const Duration(seconds: 1),
+                      ),
+                    );
                   },
                   child: const Text('Save'),
                 ),

@@ -1,4 +1,5 @@
 import 'package:chat_gpt_sdk/chat_gpt_sdk.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:fu/openai.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';

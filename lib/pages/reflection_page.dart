@@ -10,6 +10,17 @@ class ReflectionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Reflection ${reflection.id}'),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ReflectionDisplayScreen(reflection, questions),
+          ),
+        ],
+      ),
+    );
   }
 }
