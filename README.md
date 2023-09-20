@@ -1,6 +1,4 @@
-# fu
-
-F*ck Uni
+# 福 (FU)
 
 ## Getting Started
 
